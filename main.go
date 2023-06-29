@@ -5,12 +5,15 @@ import (
 	"log"
 	"time"
 
+	"github.com/gin-contrib/gzip"
+
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	app := gin.New()
+	app.Use(gzip.Gzip(gzip.DefaultCompression))
 	app.Handle("GET", "ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})
 	})
@@ -53,6 +56,7 @@ func downloadFile(ctx *gin.Context) {
 	ctx.Writer.WriteHeader(200)
 	ctx.Header("Content-Type", "text/plain;charset=utf-8")
 	ctx.Header("Transfer-Encoding", "chunked") // 告诉浏览器，分段的流式输出
+	ctx.Header("Content-Encoding", "gzip")
 	now := time.Now()
 	fileName := now.Format("20060102_150405.csv")
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment;filename=\"%s\"", fileName))
